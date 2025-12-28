@@ -89,7 +89,7 @@ int main(int argc, string argv[])
 void students_update(void)
 {
     FILE *fp = fopen("students.txt", "r");
-    if (!fp) return;
+    if (!fp){option = get_string("\nНатисни Enter за да продължиш...");return;}
     // брой символи за 1 ред
     char line[256];
     // fgets помага за четенето на файла ред по ред във for цикъла
@@ -208,8 +208,6 @@ void students_display(int class, char par, string datanames[], int dataots[])
 {
     int classotssum = class_ots_sum(class, par);
     int count = 0;
-    // индекс за глобалните масиви datanames и dataots
-    int idx = 0;
     printf("\nОбщ брой отсъствия - %i\n%i%c клас:", classotssum, class, par);
     for(int i = 0; i < MAX_STUDENTS; i++)
     {
@@ -227,36 +225,42 @@ void change_ots(string namesave)
 {
     while (true)
     {
-        int new_ots;
+        int new_ots = 0;
         new_ots = get_int("\nВъведи нов брой отсъствия - ");
-
-        for (int i = 0; i < MAX_STUDENTS; i++)
-        {
-            if (strcmp(students[i].name, namesave) == 0 && students[i].class == grade && students[i].par == parr)
-            {
-                students[i].ots = new_ots;
-                printf("\n%s има променени отсъствия - %i отс.", students[i].name, students[i].ots);
-                break;
-            }
+        if(new_ots < 0 ){
+            printf("Ученик не може да има по-малко от 0 отс.");
+            option = get_string("\nНатисни Enter за да продължиш...");
         }
+        else{
+            for (int i = 0; i < MAX_STUDENTS; i++)
+            {
+                if (strcmp(students[i].name, namesave) == 0 && students[i].class == grade && students[i].par == parr)
+                {
+                    students[i].ots = new_ots;
+                    printf("\n%s има променени отсъствия - %i отс.", students[i].name, students[i].ots);
+                    break;
+                }
+            }
 
-        // "w" вместо "а" за да пренапишем цялата информация тъй като сме я копирали в програмата и всички данни съществуват в приложението и можем спокойно да пренапишем целият файл
-        FILE *fp = fopen("students.txt", "w");
-        if (!fp)
-        {
-            printf("\nГрешка при записване на файла!");
+            // "w" вместо "а" за да пренапишем цялата информация тъй като сме я копирали в програмата и всички данни съществуват в приложението и можем спокойно да пренапишем целият файл
+            FILE *fp = fopen("students.txt", "w");
+            if (!fp)
+            {
+                printf("\nГрешка при записване на файла!");
+                option = get_string("\nНатисни Enter за да продължиш...");
+                return;
+            }
+            for (int i = 0; i < MAX_STUDENTS; i++)
+            {
+                //fprintf служи за добавяне на иформация линия по линия
+                fprintf(fp, "%s,%i,%c,%i\n", students[i].name, students[i].class, students[i].par, students[i].ots);
+            }
+            fclose(fp);
+
+            printf("\nПромените са записани във файла.");
+            option = get_string("\nНатисни Enter за да продължиш...");
             return;
         }
-        for (int i = 0; i < MAX_STUDENTS; i++)
-        {
-            //fprintf служи за добавяне на иформация линия по линия
-            fprintf(fp, "%s,%i,%c,%i\n", students[i].name, students[i].class, students[i].par, students[i].ots);
-        }
-        fclose(fp);
-
-        printf("\nПромените са записани във файла.");
-        option = get_string("\nНатисни Enter за да продължиш...");
-        return;
     }
 }
 
